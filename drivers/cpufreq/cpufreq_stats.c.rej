@@ -1,0 +1,10 @@
+--- drivers/cpufreq/cpufreq_stats.c
++++ drivers/cpufreq/cpufreq_stats.c
+@@ -415,6 +415,7 @@
+ 	unregister_hotcpu_notifier(&cpufreq_stat_cpu_notifier);
+ 	for_each_online_cpu(cpu) {
+ 		cpufreq_stats_free_table(cpu);
++		cpufreq_stats_free_sysfs(cpu);
+ 	}
+ }
+ 

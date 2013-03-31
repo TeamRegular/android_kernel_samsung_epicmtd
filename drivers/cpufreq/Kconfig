@@ -109,6 +109,105 @@ config CPU_FREQ_DEFAULT_GOV_INTERACTIVE
 	  loading your cpufreq low-level hardware driver, using the
 	  'interactive' governor for latency-sensitive workloads.
 
+config CPU_FREQ_DEFAULT_GOV_LAGFREE
+	bool "lagfree"
+	select CPU_FREQ_GOV_LAGFREE
+	select CPU_FREQ_GOV_PERFORMANCE
+	---help---
+	  Use the CPUFreq governor 'lagfree' as default. This allows
+	  you to get a full dynamic frequency capable system by simply
+	  loading your cpufreq low-level hardware driver.
+	  Be aware that not all cpufreq drivers support the lagfree
+	  governor. If unsure have a look at the help section of the
+	  driver. Fallback governor will be the performance governor.
+
+config CPU_FREQ_DEFAULT_GOV_SMARTASS2
+	bool "smartass2"
+	select CPU_FREQ_GOV_SMARTASS2
+	---help---
+	  Use the CPUFreq governor 'smartassV2' as default.
+
+config CPU_FREQ_DEFAULT_GOV_LAZY
+	bool "lazy"
+	select CPU_FREQ_GOV_LAZY
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'lazy' as default.
+
+config CPU_FREQ_DEFAULT_GOV_WHEATLEY
+	bool "wheatley"
+	select CPU_FREQ_GOV_WHEATLEY
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'wheatley' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SCARY
+	bool "scary"
+	select CPU_FREQ_GOV_SCARY
+	select CPU_FREQ_GOV_SCARY
+	help
+	  Scary governor based on Conservative with SmartAss features.
+
+config CPU_FREQ_DEFAULT_GOV_INTERACTIVEX
+	bool "interactiveX"
+	select CPU_FREQ_GOV_INTERACTIVEX
+	help
+	  Use the CPUFreq governor 'interactivex' as default. This allows
+	  you to get a full dynamic cpu frequency capable system by simply
+	  loading your cpufreq low-level hardware driver, using the
+	  'interactivex' governor for latency-sensitive workloads.
+
+config CPU_FREQ_DEFAULT_GOV_ONDEMANDX
+	bool "ondemandx"
+	select CPU_FREQ_GOV_ONDEMANDX
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'ondemandx' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SAVAGEDZEN
+	bool "savagedzen"
+	select CPU_FREQ_GOV_SAVAGEDZEN
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'savagedzen' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SMARTZEN
+	bool "smartzen"
+	select CPU_FREQ_GOV_SMARTZEN
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'smartzen' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SMOOTHZEN
+	bool "smoothzen"
+	select CPU_FREQ_GOV_SMOOTHZEN
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'smoothzen' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SMOOTHASS
+	bool "smoothass"
+	select CPU_FREQ_GOV_SMOOTHASS
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'smoothass' as default.
+
+config CPU_FREQ_DEFAULT_GOV_DYNAMIC_INTERACTIVE
+	bool "dynamic_interactive"
+	select CPU_FREQ_GOV_DYNAMIC_INTERACTIVE
+	help
+	  Use the CPUFreq governor 'dynamic interactive' as default. This allows
+	  you to get a full dynamic cpu frequency capable system by simply
+	  loading your cpufreq low-level hardware driver, using the
+	  'interactive' governor for latency-sensitive workloads. This governor
+	  changes its tunables by itself depending on the load of the system.
+
+config CPU_FREQ_DEFAULT_GOV_LULZACTIVE
+	bool "lulzactive"
+	select CPU_FREQ_GOV_LULZACTIVE
+	select CPU_FREQ_GOV_PERFORMANCE
+	help
+	  Use the CPUFreq governor 'lulzactive' as default.
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -203,6 +302,101 @@ config CPU_FREQ_GOV_CONSERVATIVE
 	  module will be called cpufreq_conservative.
 
 	  For details, take a look at linux/Documentation/cpu-freq.
+
+	  If in doubt, say N.
+
+config CPU_FREQ_GOV_LAGFREE
+        tristate "'lagfree' cpufreq governor"
+        depends on CPU_FREQ
+        ---help---
+          'lagfree' - this driver is rather similar to the 'ondemand'
+          governor both in its source code and its purpose, the difference is
+          its optimisation for better suitability in a battery powered
+          environment. The frequency is gracefully increased and decreased
+          rather than jumping to 100% when speed is required.
+
+          To compile this driver as a module, choose M here: the
+          module will be called cpufreq_lagfree.
+
+          For details, take a look at linux/Documentation/cpu-freq.
+
+          If in doubt, say N.
+
+config CPU_FREQ_GOV_SMARTASS2
+	tristate "'smartassV2' cpufreq governor"
+	depends on CPU_FREQ
+	---help---
+	  'smartassV2' - a "smart" governor
+
+config CPU_FREQ_GOV_LAZY
+	tristate "'lazy' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_WHEATLEY
+	tristate "'wheatley' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_SCARY
+	tristate "'scary' cpufreq governor"
+	depends on CPU_FREQ
+	help
+	  scary - a governor for cabbages
+	  If in doubt, say N.
+
+config CPU_FREQ_GOV_INTELLIDEMAND
+	tristate "'intellidemand' cpufreq governor"
+	depends on CPU_FREQ
+	help
+	  'intellidemand' - an intelligent ondemand governor
+
+config CPU_FREQ_GOV_INTERACTIVEX
+	tristate "'interactiveX' cpufreq policy governor"
+	help
+	  'interactiveX' - Modified version of interactive with sleep+wake code.
+
+config CPU_FREQ_GOV_ONDEMANDX
+	tristate "'ondemandx' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_SAVAGEDZEN
+	tristate "'savagedzen' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_SMARTZEN
+	tristate "'smartzen' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_SMOOTHZEN
+	tristate "'smoothzen' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_SMOOTHASS
+	tristate "'smoothass' governor"
+	depends on CPU_FREQ
+	help
+	  balanced smoothness
+
+config CPU_FREQ_GOV_DYNAMIC_INTERACTIVE
+	tristate "'dynamic_interactive' cpufreq policy governor"
+	depends on CPU_FREQ
+	help
+	  'dynamic_interactive' - This driver adds a dynamic cpufreq policy governor
+	  designed for latency-sensitive workloads.
+
+	  This governor attempts to reduce the latency of clock
+	  increases so that the system is more responsive to
+	  interactive workloads.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_interactive.
+
+	  For details, take a look at linux/Documentation/cpu-freq.
+
+config CPU_FREQ_GOV_LULZACTIVE
+	tristate "'lulzactive' cpufreq governor"
+	depends on CPU_FREQ
+	help
+	  'lulzactive' - a new interactive governor by Tegrak!
 
 	  If in doubt, say N.
 

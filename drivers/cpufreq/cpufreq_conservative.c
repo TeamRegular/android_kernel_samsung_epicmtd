@@ -29,8 +29,8 @@
  * It helps to keep variable names smaller, simpler
  */
 
-#define DEF_FREQUENCY_UP_THRESHOLD		(80)
-#define DEF_FREQUENCY_DOWN_THRESHOLD		(20)
+#define DEF_FREQUENCY_UP_THRESHOLD		(75)
+#define DEF_FREQUENCY_DOWN_THRESHOLD		(25)
 
 /*
  * The polling frequency of this governor depends on the capability of
@@ -194,7 +194,9 @@ static ssize_t store_sampling_down_factor(struct kobject *a,
 	if (ret != 1 || input > MAX_SAMPLING_DOWN_FACTOR || input < 1)
 		return -EINVAL;
 
+	mutex_lock(&dbs_mutex);
 	dbs_tuners_ins.sampling_down_factor = input;
+	mutex_unlock(&dbs_mutex);
 	return count;
 }
 
@@ -208,7 +210,9 @@ static ssize_t store_sampling_rate(struct kobject *a, struct attribute *b,
 	if (ret != 1)
 		return -EINVAL;
 
+	mutex_lock(&dbs_mutex);
 	dbs_tuners_ins.sampling_rate = max(input, min_sampling_rate);
+	mutex_unlock(&dbs_mutex);
 	return count;
 }
 
@@ -219,11 +223,15 @@ static ssize_t store_up_threshold(struct kobject *a, struct attribute *b,
 	int ret;
 	ret = sscanf(buf, "%u", &input);
 
+	mutex_lock(&dbs_mutex);
 	if (ret != 1 || input > 100 ||
-			input <= dbs_tuners_ins.down_threshold)
+			input <= dbs_tuners_ins.down_threshold) {
+		mutex_unlock(&dbs_mutex);
 		return -EINVAL;
+	}
 
 	dbs_tuners_ins.up_threshold = input;
+	mutex_unlock(&dbs_mutex);
 	return count;
 }
 
@@ -234,12 +242,16 @@ static ssize_t store_down_threshold(struct kobject *a, struct attribute *b,
 	int ret;
 	ret = sscanf(buf, "%u", &input);
 
+	mutex_lock(&dbs_mutex);
 	/* cannot be lower than 11 otherwise freq will not fall */
 	if (ret != 1 || input < 11 || input > 100 ||
-			input >= dbs_tuners_ins.up_threshold)
+			input >= dbs_tuners_ins.up_threshold) {
+		mutex_unlock(&dbs_mutex);
 		return -EINVAL;
+	}
 
 	dbs_tuners_ins.down_threshold = input;
+	mutex_unlock(&dbs_mutex);
 	return count;
 }
 
@@ -258,9 +270,11 @@ static ssize_t store_ignore_nice_load(struct kobject *a, struct attribute *b,
 	if (input > 1)
 		input = 1;
 
-	if (input == dbs_tuners_ins.ignore_nice) /* nothing to do */
+	mutex_lock(&dbs_mutex);
+	if (input == dbs_tuners_ins.ignore_nice) { /* nothing to do */
+		mutex_unlock(&dbs_mutex);
 		return count;
-
+	}
 	dbs_tuners_ins.ignore_nice = input;
 
 	/* we need to re-evaluate prev_cpu_idle */
@@ -272,6 +286,7 @@ static ssize_t store_ignore_nice_load(struct kobject *a, struct attribute *b,
 		if (dbs_tuners_ins.ignore_nice)
 			dbs_info->prev_cpu_nice = kstat_cpu(j).cpustat.nice;
 	}
+	mutex_unlock(&dbs_mutex);
 	return count;
 }
 
@@ -290,7 +305,9 @@ static ssize_t store_freq_step(struct kobject *a, struct attribute *b,
 
 	/* no need to test here if freq_step is zero as the user might actually
 	 * want this, they would be crazy though :) */
+	mutex_lock(&dbs_mutex);
 	dbs_tuners_ins.freq_step = input;
+	mutex_unlock(&dbs_mutex);
 	return count;
 }
 
@@ -504,6 +521,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 						kstat_cpu(j).cpustat.nice;
 			}
 		}
+		this_dbs_info->cpu = cpu;
 		this_dbs_info->down_skip = 0;
 		this_dbs_info->requested_freq = policy->cur;
 
@@ -531,14 +549,8 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			 * conservative does not implement micro like ondemand
 			 * governor, thus we are bound to jiffes/HZ
 			 */
-			min_sampling_rate =
-				MIN_SAMPLING_RATE_RATIO * jiffies_to_usecs(10);
-			/* Bring kernel and HW constraints together */
-			min_sampling_rate = max(min_sampling_rate,
-					MIN_LATENCY_MULTIPLIER * latency);
-			dbs_tuners_ins.sampling_rate =
-				max(min_sampling_rate,
-				    latency * LATENCY_MULTIPLIER);
+			min_sampling_rate = 10000;
+			dbs_tuners_ins.sampling_rate = min_sampling_rate;
 
 			cpufreq_register_notifier(
 					&dbs_cpufreq_notifier_block,
@@ -583,6 +595,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			__cpufreq_driver_target(
 					this_dbs_info->cur_policy,
 					policy->min, CPUFREQ_RELATION_L);
+		dbs_check_cpu(this_dbs_info);
 		mutex_unlock(&this_dbs_info->timer_mutex);
 
 		break;
