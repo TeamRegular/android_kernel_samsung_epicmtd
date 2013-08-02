@@ -355,12 +355,9 @@ static struct s3c2410_uartcfg victory_uartcfgs[] __initdata = {
 	},
 };
 
-#define S5PV210_LCD_WIDTH 480
-#define S5PV210_LCD_HEIGHT 800
-
 static struct s3cfb_lcd nt35580 = {
-	.width = S5PV210_LCD_WIDTH,
-	.height = S5PV210_LCD_HEIGHT,
+	.width = 480,
+	.height = 800,
 	.p_width = 52,
 	.p_height = 86,
 	.bpp = 24,
@@ -383,105 +380,66 @@ static struct s3cfb_lcd nt35580 = {
 	},
 };
 
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0 (12288 * SZ_1K)
-// Disabled to save memory (we can't find where it's used)
-//#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC1 (9900 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2 (12288 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC0 (14336 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC1 (21504 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD (S5PV210_LCD_WIDTH * \
-					     S5PV210_LCD_HEIGHT * 4 * \
-					     (CONFIG_FB_S3C_NR_BUFFERS + \
-						 (CONFIG_FB_S3C_NUM_OVLY_WIN * \
-						  CONFIG_FB_S3C_NUM_BUF_OVLY_WIN)))
-// Was 8M, but we're only using it to encode VGA jpegs
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_JPEG (4096 * SZ_1K)
-#define  S5PV210_ANDROID_PMEM_MEMSIZE_PMEM (5550 * SZ_1K)
-#define  S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_GPU1 (3000 * SZ_1K)
-#define  S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_ADSP (1500 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXTSTREAM (3000 * SZ_1K)
-
-
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0 (11264 * SZ_1K)
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC1 (1024 * SZ_1K)
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2 (11264 * SZ_1K)
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC0 (14336 * SZ_1K) // 11MB
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC1 (21504 * SZ_1K) // 11MB
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD (800 * 480 * 4 * \
+		(CONFIG_FB_S3C_NR_BUFFERS + \
+		(CONFIG_FB_S3C_NUM_OVLY_WIN * \
+		 CONFIG_FB_S3C_NUM_BUF_OVLY_WIN)))
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_JPEG (5012 * SZ_1K)
 static struct s5p_media_device victory_media_devs[] = {
 	[0] = {
+		.id = S5P_MDEV_FIMD,
+		.name = "fimd",
+		.bank = 1,
+		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD,
+		.paddr = 0x4FC00000,
+	},
+	[1] = {
 		.id = S5P_MDEV_MFC,
 		.name = "mfc",
 		.bank = 0,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC0,
 		.paddr = 0,
 	},
-	[1] = {
+	[2] = {
 		.id = S5P_MDEV_MFC,
 		.name = "mfc",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC1,
 		.paddr = 0,
 	},
-	[2] = {
+	[3] = {
 		.id = S5P_MDEV_FIMC0,
 		.name = "fimc0",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0,
 		.paddr = 0,
 	},
-/*	[3] = {
+	[4] = {
 		.id = S5P_MDEV_FIMC1,
 		.name = "fimc1",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC1,
 		.paddr = 0,
-	},*/
-	[4] = {
+	},
+	[5] = {
 		.id = S5P_MDEV_FIMC2,
 		.name = "fimc2",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2,
 		.paddr = 0,
 	},
-	[5] = {
+	[6] = {
 		.id = S5P_MDEV_JPEG,
 		.name = "jpeg",
 		.bank = 0,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_JPEG,
 		.paddr = 0,
 	},
-	[6] = {
-		.id = S5P_MDEV_FIMD,
-		.name = "fimd",
-		.bank = 1,
-		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD,
-		.paddr = 0,
-	},
-#ifdef CONFIG_ANDROID_PMEM
-	[7] = {
-		.id = S5P_MDEV_PMEM,
-		.name = "pmem",
-		.bank = 0,
-		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM,
-		.paddr = 0,
-	},
-	[8] = {
-		.id = S5P_MDEV_PMEM_GPU1,
-		.name = "pmem_gpu1",
-		.bank = 0,
-		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_GPU1,
-		.paddr = 0,
-	},
-	[9] = {
-		.id = S5P_MDEV_PMEM_ADSP,
-		.name = "pmem_adsp",
-		.bank = 0,
-		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_ADSP,
-		.paddr = 0,
-		},
-	[10] = {
-		.id = S5P_MDEV_TEXSTREAM,
-		.name = "s3c_bc",
-		.bank = 1,
-		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXTSTREAM,
-		.paddr = 0,
-	},	
-#endif
 };
 
 #ifdef CONFIG_CPU_FREQ
